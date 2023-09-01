@@ -4569,7 +4569,7 @@ SWITCH_DECLARE(switch_status_t) switch_channel_set_timestamps(switch_channel_t *
 							*(X+plen) = '\0';
 							
 							switch_safe_free(substituted);
-							substituted = switch_string_replace(substituted ? substituted : dtstr, replace, X);
+							substituted = switch_string_replace(dtstr, replace, X);
 							
 							pcre_free_substring(replace);
 						}
