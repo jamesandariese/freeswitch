@@ -13588,6 +13588,7 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 		if (zstr(attr->a_name)) {
 			continue;
 		}
+
 		if (!strcasecmp(attr->a_name, "ptime")) {
 			dptime = atoi(attr->a_value);
 			break;
@@ -13600,22 +13601,27 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 		if ((m->m_type == sdp_media_audio || m->m_type == sdp_media_video) && m->m_port) {
 			for (map = m->m_rtpmaps; map; map = map->rm_next) {
 				int found = 0;
+
 				for (attr = m->m_attributes; attr && found < 2; attr = attr->a_next) {
 					if (zstr(attr->a_name)) {
 						continue;
 					}
+
 					if (!strcasecmp(attr->a_name, "ptime") && attr->a_value) {
 						ptime = atoi(attr->a_value);
 						found++;
 					}
+
 					if (!strcasecmp(attr->a_name, "rtcp-mux")) {
 						if (switch_channel_var_true(channel, "rtcp_mux_auto_detect")) {
 							switch_log_printf(SWITCH_CHANNEL_CHANNEL_LOG(channel), SWITCH_LOG_DEBUG, "setting rtcp-mux from sdp\n");
 							switch_channel_set_variable(channel, "rtcp_mux", "true");
 						}
+
 						found++;
 					}
 				}
+
 				switch_core_media_add_payload_map(session,
 												  m->m_type == sdp_media_audio ? SWITCH_MEDIA_TYPE_AUDIO : SWITCH_MEDIA_TYPE_VIDEO,
 												  map->rm_encoding,
@@ -13641,11 +13647,13 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 				if (zstr(attr->a_name)) {
 					continue;
 				}
+
 				if (!strcasecmp(attr->a_name, "ptime") && attr->a_value) {
 					ptime = atoi(attr->a_value);
 					break;
 				}
 			}
+
 			connection = sdp->sdp_connection;
 			if (m->m_connections) {
 				connection = m->m_connections;
@@ -13659,7 +13667,7 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 			if (switch_channel_direction(channel) == SWITCH_CALL_DIRECTION_INBOUND || prefer_sdp) {
 				for (map = m->m_rtpmaps; map; map = map->rm_next) {
 
-					if (map->rm_pt > 127 || already_did[map->rm_pt]) {
+					if (already_did[map->rm_pt]) {
 						continue;
 					}
 
@@ -13680,19 +13688,20 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 						if (match) {
 							add_audio_codec(map, imp, ptime, buf, sizeof(buf));
 						}
-
 					}
 				}
 
 			} else {
 				for (i = 0; i < num_codecs; i++) {
 					const switch_codec_implementation_t *imp = codecs[i];
+
 					if (imp->codec_type != SWITCH_CODEC_TYPE_AUDIO || imp->ianacode > 127 || already_did[imp->ianacode]) {
 						continue;
 					}
+
 					for (map = m->m_rtpmaps; map; map = map->rm_next) {
 
-						if (map->rm_pt > 127 || already_did[map->rm_pt]) {
+						if (already_did[map->rm_pt]) {
 							continue;
 						}
 
@@ -13725,11 +13734,10 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 				break;
 			}
 
-
 			if (switch_channel_direction(channel) == SWITCH_CALL_DIRECTION_INBOUND || prefer_sdp) {
 				for (map = m->m_rtpmaps; map; map = map->rm_next) {
 
-					if (map->rm_pt > 127 || already_did[map->rm_pt]) {
+					if (already_did[map->rm_pt]) {
 						continue;
 					}
 
@@ -13753,11 +13761,11 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 							} else {
 								switch_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), ",%s.%s", imp->modname, imp->iananame);
 							}
+
 							already_did[imp->ianacode] = 1;
 						}
 					}
 				}
-
 			} else {
 				for (i = 0; i < num_codecs; i++) {
 					const switch_codec_implementation_t *imp = codecs[i];
@@ -13773,7 +13781,7 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 
 					for (map = m->m_rtpmaps; map; map = map->rm_next) {
 
-						if (map->rm_pt > 127 || already_did[map->rm_pt]) {
+						if (already_did[map->rm_pt]) {
 							continue;
 						}
 
@@ -13794,6 +13802,7 @@ static void switch_core_media_set_r_sdp_codec_string(switch_core_session_t *sess
 							} else {
 								switch_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), ",%s.%s", imp->modname, imp->iananame);
 							}
+
 							already_did[imp->ianacode] = 1;
 						}
 					}
